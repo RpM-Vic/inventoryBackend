@@ -13,6 +13,7 @@ export class HistorialesEndpoints {
   setupRoutes() {
     this.router.get('/historialediciones/:page',
       async (req: AuthRequest, res: Response) => {
+        console.log("historial ediciones")
         let { page } = req.params;
         if (!page) {
           page = '1';
@@ -35,6 +36,7 @@ export class HistorialesEndpoints {
 
         this.router.get('/productosvendidos/:page',
           async (req: AuthRequest, res: Response) => {
+            console.log("flag 1")
             let { page } = req.params;
             if (!page) {
               page = '1';
@@ -46,14 +48,20 @@ export class HistorialesEndpoints {
             numberPage = Math.abs(numberPage);
             numberPage = Math.round(numberPage);
             numberPage = Math.max(1, numberPage);
-
-            const productosvendidos =
-              await this.historiales.getProductosVendidos(numberPage);
-            res.json({
-              ok: true,
-              message: 'Resultados obtenidos',
-              productosvendidos,
-            });
+            try{
+              const productosvendidos =await this.historiales.getProductosVendidos(numberPage);
+              res.json({
+                ok: true,
+                message: 'Resultados obtenidos',
+                productosvendidos,
+              });
+            }
+            catch(e){
+              res.json({
+                ok: true,
+                message: e
+              });
+            }
           }
         );
 

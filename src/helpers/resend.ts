@@ -12,7 +12,7 @@ export const sendEmail = (
   return new Promise(async(resolve,reject)=>{
     try {
       const data = await resend.emails.send({
-        from: 'no-reply@yourdomain.com', // Use your verified domain
+        from: 'no-reply@rpm-vic.xyz', 
         to,
         subject,
         html

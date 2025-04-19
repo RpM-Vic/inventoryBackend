@@ -13,7 +13,8 @@ export class HistorialesSqlite2 implements HistorialesQueries {
       u.apellidos, 
       h.operacion, 
       h.productos_afectados, 
-      h.fecha_modificacion
+      h.fecha_modificacion,
+      h.descripcion
     FROM 
       historial_ediciones h
     JOIN 
@@ -111,16 +112,19 @@ export class HistorialesSqlite2 implements HistorialesQueries {
   recordEdition(
     operacion: string,
     id_usuario: string,
-    productos_afectados: number
+    productos_afectados: number,
+    descripcion:any
   ): Promise<void> {
+    const stringDescription=JSON.stringify(descripcion)
     const fecha_modificacion = new Date().toISOString();
     const query = `
     INSERT INTO historial_ediciones (
       operacion, 
       id_usuario,
       productos_afectados,
-      fecha_modificacion
-    ) VALUES (?, ?, ?, ?)
+      fecha_modificacion,
+      descripcion
+    ) VALUES (?, ?, ?, ?, ?)
   `;
 
     return new Promise((resolve, reject) => {
@@ -130,7 +134,8 @@ export class HistorialesSqlite2 implements HistorialesQueries {
           operacion,
           id_usuario,
           productos_afectados,
-          fecha_modificacion
+          fecha_modificacion,
+          stringDescription
         );
         resolve();
       } catch (error) {
@@ -232,8 +237,8 @@ export class HistorialesSqlite2 implements HistorialesQueries {
   deleteOldLogs(): Promise<void> {
     // Calculate the date 3 months ago in ISO 8601 format
     const threeMonthsAgo = new Date();
-    threeMonthsAgo.setHours(threeMonthsAgo.getHours() - 20);
-    // threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    // threeMonthsAgo.setHours(threeMonthsAgo.getHours() - 20);
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     const threeMonthsAgoISO = threeMonthsAgo.toISOString();
 
     const query = `DELETE FROM logs WHERE timestamp < ?`;
@@ -256,8 +261,8 @@ export class HistorialesSqlite2 implements HistorialesQueries {
   deleteOldEdits(): Promise<void> {
     // Calculate the date 3 months ago in ISO 8601 format
     const threeMonthsAgo = new Date();
-    threeMonthsAgo.setHours(threeMonthsAgo.getHours() - 20);
-    // threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    // threeMonthsAgo.setHours(threeMonthsAgo.getHours() - 20);
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     const threeMonthsAgoISO = threeMonthsAgo.toISOString();
 
     const query = `DELETE FROM historial_ediciones WHERE fecha_modificacion < ?`;

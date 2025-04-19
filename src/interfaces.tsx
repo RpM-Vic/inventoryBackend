@@ -76,7 +76,8 @@ export const defaultNewProduct={
   maximo:0,
   codigo_barras:"null",
   ubicacion:"null",
-  contenido:0
+  contenido:0,
+  en_transito:0
 }
 
 export interface IpurchaseList{
@@ -120,7 +121,8 @@ export interface HistorialesQueries{
   recordEdition(
     operacion: string,
     id_usuario: string,
-    productos_afectados: number
+    productos_afectados: number,
+    descripcion:any
   ): Promise<void>,
   recordVendidos(
     id_venta: string,

@@ -110,6 +110,7 @@ web_modules/
 .env.local
 /src/env
 /data
+/cert
 main.exe
 /src/main.exe
 install.exe

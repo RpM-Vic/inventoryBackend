@@ -3,8 +3,6 @@ import { Router, type Response } from 'express';
 import {
   defaultNewProduct,
   type HistorialesQueries,
-  type IMiddlewares,
-  type IProducto,
   type IProductosPatch,
   type IpurchaseList,
   type IRecibidosList,
@@ -36,7 +34,7 @@ export class ProductEndpoints {
     //for transactions (faster)upload a csv
     this.router.post('/', async (req: AuthRequest, res: Response) => {
       const products: (typeof defaultNewProduct)[] = req.body;
-      let cantidad = 0;
+      const productIds:string[] = [];
       const failures: { product: string; error: any }[] = [];
 
       try {
@@ -44,8 +42,8 @@ export class ProductEndpoints {
         const createProductPromises = products.map(async (product1) => {
           if (product1.descripcion) {
             try {
-              await this.queries.createProduct(product1);
-              cantidad++;
+              const id=await this.queries.createProduct(product1);
+              productIds.push(id);
             } catch (e) {
               // Track failed products
               failures.push({ product: product1.descripcion, error: e });
@@ -58,13 +56,14 @@ export class ProductEndpoints {
 
         // Record the edition
         try {
-          if (cantidad) {
+          if (productIds.length>0) {
             const id_usuario = req.user?.id_usuario;
             id_usuario &&
               (await this.historiales.recordEdition(
                 'creacion',
                 id_usuario,
-                cantidad
+                productIds.length,
+                productIds
               ));
           }
         } catch (e) {
@@ -75,13 +74,13 @@ export class ProductEndpoints {
         if (failures.length === 0) {
           res.json({
             res: true,
-            message: `${cantidad} productos creados con éxito`,
+            message: `${productIds.length} productos creados con éxito`,
           });
         } else {
           res.status(207).json({
             // 207 Multi-Status
             res: false,
-            message: `${cantidad} productos creados con éxito, pero ${failures.length} operaciones fallaron`,
+            message: `${productIds.length} productos creados con éxito, pero ${failures.length} operaciones fallaron`,
             failures,
           });
         }
@@ -319,7 +318,7 @@ export class ProductEndpoints {
     
       try {
         // Record the edition in the history
-        await this.historiales.recordEdition('edicion', id_usuario, ediciones);
+        await this.historiales.recordEdition('edicion', id_usuario, ediciones,allUpdates);
     
         // Respond with success message
         res.json({
@@ -368,7 +367,7 @@ export class ProductEndpoints {
           });
           const id_usuario = req.user?.id_usuario;
           id_usuario &&
-            (await this.historiales.recordEdition('borrado', id_usuario, 1));
+            (await this.historiales.recordEdition('borrado', id_usuario, 1,id_producto));
         } else {
           res
             .status(204)
@@ -389,6 +388,7 @@ export class ProductEndpoints {
     });
 
     this.router.post('/upload-csv', upload.single('csv'), (req, res) => {
+      console.log("file upload requested")
       if (!req.file) {
         res.status(400).json({ message: 'No file uploaded.' });
         return;

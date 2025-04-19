@@ -2,7 +2,6 @@ import {
   defaultNewProduct,
   generadorProducto,
   type IProducto,
-  type IProductoNuevo,
   type ProductQueries,
 } from '../../interfaces';
 import { generateId } from '../ids';

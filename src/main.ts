@@ -38,14 +38,21 @@ const userEndpoints=new UserEndpoints(userSqlite,middlewares)
 const pages=new Pages(middlewares)
 
 app.use(cors(), express.json(), limiter, cookieParser());
+// app.use((req, res, next) => {
+//   if (!req.secure) {
+//     return res.redirect(`https://${req.headers.host}${req.url}`);
+//   }
+//   next();
+// });
 
 app.use('/login',limiter,loginEndpoints.router);
-app.use('/historiales',limiter,middlewares.validateUserRol, 
+app.use('/historiales',limiter,//middlewares.validateUserRol, 
   historialesEndpoints.router);
 app.use('/product',limiter,middlewares.validateUserRol, 
   productEndpoints.router);
 app.use('/user', limiter,userEndpoints.router);
 app.use('/',pages.router);
+
 
 // Function to get the IP address of the device
 const ipAddress = getLocalIpAddress();
@@ -53,9 +60,14 @@ const ipAddress = getLocalIpAddress();
 const options = {
   key: fs.readFileSync(path.join(process.cwd(), "key.pem"), "utf-8"),
   cert: fs.readFileSync(path.join(process.cwd(), "cert.pem"), "utf-8"),
-};
+
+  // key: fs.readFileSync(path.join(process.cwd(),"cert", 'server.key')),  // Private key
+  // cert: fs.readFileSync(path.join(process.cwd(),"cert", 'server.crt')), // Server certificate
+}
 
 https.createServer(options, app).listen(PORT, () => {
+// app.listen(PORT, () => {
+
   const now = new Date();
   const timeString = now.toLocaleTimeString('en-US', {
     hour: '2-digit',

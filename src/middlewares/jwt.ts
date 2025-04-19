@@ -23,31 +23,44 @@ export class Middlewares implements IMiddlewares{
   }
 
   validateUserRol=async(req:AuthRequest, res:Response,next:NextFunction)=>{
+
+    const denyAccess=()=>{
+      if(req.method=='GET'){
+        res.redirect('/')
+      }
+      else{
+        res.json({
+          ok:false,
+          message:"No tienes permisos suficientes"
+        })
+      }
+    }
+
     const token =req.cookies.MyTokenName
     if(!token){
-      res.redirect("/")
+      denyAccess()
       return;
     }
   
     const payload=Jwt.verify(token,SECRET) as AuthRequest['user']
   
     if(payload==undefined){
-      res.redirect("/")
+      denyAccess()
       return;
     }
     if (payload?.ValidFrontEnd!== 'ValidFrontEnd') {
-      res.redirect("/")
+      denyAccess()
       return;
     }
     if (!payload?.id_usuario) {
-      res.redirect("/")
+      denyAccess()
       return;
     }
   
     const realRoles=await this.getRoles.getRoles(payload.id_usuario)
   
     if(realRoles!=="user"&&realRoles!=="admin"){
-      res.redirect("/")
+      denyAccess()
     }
   
     req.user=payload
@@ -56,34 +69,44 @@ export class Middlewares implements IMiddlewares{
   }
 
   validateAdminRol=async(req:AuthRequest, res:Response,next:NextFunction)=>{
+
+    const denyAccess=()=>{
+      if(req.method=='GET'){
+        res.redirect('/')
+      }
+      else{
+        res.json({
+          ok:false,
+          message:"No tienes permisos suficientes"
+        })
+      }
+    }
+
     const token =req.cookies.MyTokenName
     if(!token){
-      res.redirect("/")
+      denyAccess()
       return;
     }
   
     const payload=Jwt.verify(token,SECRET) as AuthRequest['user']
   
     if(payload==undefined){
-      res.redirect("/")
+      denyAccess()
       return;
     }
     if (payload?.ValidFrontEnd!== 'ValidFrontEnd') {
-      res.redirect("/")
+      denyAccess()
       return;
     }
     if (!payload?.id_usuario) {
-      res.redirect("/")
+      denyAccess()
       return;
     }
   
     const realRoles=await this.getRoles.getRoles(payload.id_usuario)
   
     if(realRoles!=="admin"){
-      res.json({
-        ok:false,
-        message:"No tienes permiso para hacer esto"
-      })
+      denyAccess()
       return
     }
   

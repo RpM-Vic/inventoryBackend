@@ -37,10 +37,8 @@ import db from "./connectionBun";
 //   );
 // `);
 
-
-
 // db.exec(`
-//   ALTER TABLE usuarios ADD COLUMN buffer TEXT;
+//   ALTER TABLE productos ADD COLUMN en_transito REAL;
 // `);
 
 // db.exec(`

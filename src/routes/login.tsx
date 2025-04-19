@@ -188,13 +188,18 @@ export class LoginEndPoints {
       res.redirect('/');
     });
 
-    this.router.get('/user',this.middlewares.validateUserRol,(req:AuthRequest,res)=>{
+    this.router.get('/user',this.middlewares.validateUserRol,
+      (req:AuthRequest,res)=>{
       const correo=req.user?.correo
-      
+      const nombre=req.user?.nombre
+      const id_usuario=req.user?.id_usuario
+
       res.json({
         ok:true,
-        message:"hello",
-        correo
+        message:"hello world",
+        correo,
+        nombre,
+        id_usuario
       })
     })
 
