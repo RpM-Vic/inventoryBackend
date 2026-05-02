@@ -80,6 +80,8 @@ import db from "./connectionBun";
 //     activo INTEGER DEFAULT 1, -- 1 = active, 0 = inactive soft delete
 //     fecha_creacion TEXT DEFAULT (datetime('now')),
 //     fecha_modificacion TEXT DEFAULT (datetime('now'))
+      //  roles TEXT,
+      //  OTP TEXT 
 //   );
 // `);
 // db.exec(`
@@ -103,6 +105,8 @@ import db from "./connectionBun";
 //     product REAL,
 //     activo INTEGER DEFAULT 1, -- 1 = active, 0 = inactive soft delete
 //     fecha_actualizacion TEXT DEFAULT (datetime('now'))
+// contenido INTEGER,
+// en_transito INTEGER
 //   );
 // `);
 // db.exec(`

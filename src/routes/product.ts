@@ -34,6 +34,7 @@ export class ProductEndpoints {
     //for transactions (faster)upload a csv
     this.router.post('/', async (req: AuthRequest, res: Response) => {
       const products: (typeof defaultNewProduct)[] = req.body;
+      // console.log(products)
       const productIds:string[] = [];
       const failures: { product: string; error: any }[] = [];
 
@@ -73,13 +74,13 @@ export class ProductEndpoints {
         // Send response with success and failure details
         if (failures.length === 0) {
           res.json({
-            res: true,
+            ok: true,
             message: `${productIds.length} productos creados con éxito`,
           });
         } else {
           res.status(207).json({
             // 207 Multi-Status
-            res: false,
+            ok: false,
             message: `${productIds.length} productos creados con éxito, pero ${failures.length} operaciones fallaron`,
             failures,
           });
@@ -387,38 +388,70 @@ export class ProductEndpoints {
       }
     });
 
-    this.router.post('/upload-csv', upload.single('csv'), (req, res) => {
-      console.log("file upload requested")
+    this.router.post('/upload-csv', upload.single('csv'), async (req, res) => {
+      console.log("Upload requested");
+      console.time('TOTAL_OPERATION');
+      
       if (!req.file) {
+        console.timeEnd('TOTAL_OPERATION');
         res.status(400).json({ message: 'No file uploaded.' });
         return;
       }
-
+    
       const filePath = req.file.path;
       const results: any[] = [];
-
-      // Read and parse the CSV file
-      fs.createReadStream(filePath)
-        .pipe(csv())
-        .on('data', (data) => results.push(data))
-        .on('end', () => {
-          this.queries.insertCSVData(results);
-
-          // Delete the temporary file
-          fs.unlinkSync(filePath);
-
-          res.json({
-            ok: true,
-            message: 'CSV se guardo con éxito',
-          });
-        })
-        .on('error', (error) => {
-          console.error('Error parsing CSV:', error);
-          res.json({
-            ok: false,
-            message: JSON.stringify(error),
-          });
+    
+      try {
+        // Phase 1: CSV Parsing
+        console.time('CSV_PARSING');
+        await new Promise<void>((resolve, reject) => {
+          fs.createReadStream(filePath)
+            .pipe(csv())
+            .on('data', (data) => results.push(data))
+            .on('end', () => {
+              console.timeEnd('CSV_PARSING');
+              console.log(`Parsed ${results.length} records`);
+              resolve();
+            })
+            .on('error', reject);
         });
+    
+        // Phase 2: Database Insertion
+        console.time('DB_INSERTION');
+        await this.queries.insertCSVData(results);
+        console.timeEnd('DB_INSERTION');
+    
+        // Phase 3: File Cleanup
+        console.time('FILE_CLEANUP');
+        fs.unlinkSync(filePath);
+        console.timeEnd('FILE_CLEANUP');
+    
+        console.timeEnd('TOTAL_OPERATION');
+        
+        res.json({
+          ok: true,
+          message: 'CSV se guardó con éxito',
+          metrics: {
+            recordCount: results.length,
+            parseTime: `${console.timeLog('CSV_PARSING')}ms`,
+            insertTime: `${console.timeLog('DB_INSERTION')}ms`
+          }
+        });
+    
+      } catch (error) {
+        console.timeEnd('TOTAL_OPERATION');
+        console.error('Operation failed:', error);
+        
+        // Cleanup file if exists
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+    
+        res.status(500).json({
+          ok: false,
+          message: error instanceof Error ? error.message : 'Error processing CSV'
+        });
+      }
     });
   }
 }

@@ -46,24 +46,6 @@ interface IserverOnly{
 
 export type IProducto=IProductoNuevo& IserverOnly 
 
-export const generadorProducto=[
-  'id_producto',
-  'descripcion',
-  'precio',
-  'categoria',
-  'codigo_externo',
-  'marca',
-  'proveedor',
-  'stock',
-  'minimo',
-  'maximo',
-  'codigo_barras',
-  'ubicacion',
-  'contenido',
-  'activo',
-  'fecha_actualizacion'
-]
-
 export const defaultNewProduct={
   descripcion:"null",
   precio:0,

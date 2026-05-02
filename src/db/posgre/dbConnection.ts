@@ -1,14 +1,16 @@
-//to be continued
-import pg from "pg"
+// import pkg from "pg";
 
-export const pool= new pg.Pool({
-  user:,
-  host:,
-  password:,
-  database:,
-  port:5432
-})
+// const { Pool } = pkg;
 
+// export const pool = new Pool({
+//   connectionString: process.env.DATABASE_URL,  
+// });
 
-pool.query('SELECT NOW()')
-.then(result=>console.log(result))
+// export async function testConnection() {
+//   try {
+//     const result = await pool.query("SELECT NOW()");
+//     console.log("Connected! Server time:", result.rows[0].now);
+//   } catch (err) {
+//     console.error("Connection error:", err);
+//   }
+// }

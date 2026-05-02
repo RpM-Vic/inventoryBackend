@@ -1,6 +1,5 @@
 import {
   defaultNewProduct,
-  generadorProducto,
   type IProducto,
   type ProductQueries,
 } from '../../interfaces';
@@ -65,19 +64,6 @@ export class ProductSqlite implements ProductQueries {
     const fecha_actualizacion = new Date().toISOString();
     const activo = true;
 
-    let query1 = 'INSERT INTO productos (';
-    let query2 = ') VALUES (';
-    generadorProducto.forEach((propiedad, index) => {
-      if (index != 0) {
-        query1 += ', ';
-        query2 += ',';
-      }
-      query1 += propiedad;
-      query2 += '? ';
-    });
-
-    const query = query1 + query2 + ')';
-
     const onlykeys = Object.keys(defaultNewProduct);
 
     return new Promise((resolve, reject) => {
@@ -99,8 +85,23 @@ export class ProductSqlite implements ProductQueries {
           return productValue !== undefined ? productValue : defaultValue;
         });
 
+        const serverOnly=["id_producto","fecha_actualizacion","activo"]
+        onlykeys.unshift(...serverOnly)
+        let query1 = 'INSERT INTO productos (';
+        let query2 = ') VALUES (';
+        onlykeys.forEach((propiedad, index) => {
+          if (index != 0) {
+            query1 += ', ';
+            query2 += ',';
+          }
+          query1 += propiedad;
+          query2 += '? ';
+        });
+    
+        const query = query1 + query2 + ')';
+
         const stmt = db.prepare(query);
-        stmt.run(id_producto, ...values, activo, fecha_actualizacion);
+        stmt.run( id_producto,fecha_actualizacion,activo,...values);
         resolve(id_producto); // Return the ID of the created product
       } catch (e) {
         const message = 'no se pudieron crear los productos';
@@ -219,21 +220,10 @@ export class ProductSqlite implements ProductQueries {
         const fecha_actualizacion = new Date().toISOString();
         const activo = true;
 
-        // Generate the SQL query dynamically
-        let query1 = 'INSERT INTO productos (';
-        let query2 = ') VALUES (';
-        generadorProducto.forEach((propiedad, index) => {
-          if (index != 0) {
-            query1 += ', ';
-            query2 += ',';
-          }
-          query1 += propiedad;
-          query2 += '?';
-        });
-        const query = query1 + query2 + ')';
-
-        // Extract values from the product object
         const onlykeys = Object.keys(defaultNewProduct);
+        
+        // Extract values from the product object
+        
         const values = onlykeys.map((onlykey) => {
           const productValue =
             producto[onlykey as keyof typeof defaultNewProduct];
@@ -256,9 +246,24 @@ export class ProductSqlite implements ProductQueries {
           return productValue !== undefined ? productValue : defaultValue;
         });
 
+         // Generate the SQL query dynamically
+         const serverOnly=["id_producto","fecha_actualizacion","activo"]
+         onlykeys.unshift(...serverOnly)
+         let query1 = 'INSERT INTO productos (';
+         let query2 = ') VALUES (';
+           onlykeys.forEach((propiedad, index) => {
+           if (index != 0) {
+             query1 += ', ';
+             query2 += ',';
+           }
+           query1 += propiedad;
+           query2 += '?';
+         });
+         const query = query1 + query2 + ')';
+
         // Execute the query
         const insert = db.prepare(query);
-        insert.run(id_producto, ...values, activo, fecha_actualizacion);
+        insert.run( id_producto,fecha_actualizacion,activo,...values);
       }
     });
 

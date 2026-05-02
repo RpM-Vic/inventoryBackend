@@ -104,7 +104,11 @@ web_modules/
 .env.development.local
 .env.test.local
 /src/test.tsx
-/public
+/uploads
+
+bun.lock
+
+
 
 .env.production.local
 .env.local

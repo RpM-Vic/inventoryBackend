@@ -110,32 +110,30 @@ export class UserSqlite implements UserQueries {
     const fecha_creacion = new Date().toISOString();
     const fecha_modificacion = fecha_creacion;
 
-    const query = `
+    const query = /* sql */`
     INSERT INTO usuarios (
-      contrasena,
       id_usuario, 
       nombre, 
       apellidos,
       correo,
+      contrasena,
       fecha_creacion,
       fecha_modificacion,
-      buffer,
       OTP,
       roles
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
     return new Promise((resolve, reject) => {
       try {
         const stmt = db.prepare(query);
         stmt.run(
           id,
-          id,
           nombre,
           apellidos,
           correo,
+          contrasenaHash,
           fecha_creacion,
           fecha_modificacion,
-          contrasenaHash,
           OTP,
           roles
         );
